@@ -2,55 +2,86 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const EMAIL_FROM = 'Ifeanyi @ ifecyber <onboarding@ifecyber.com>'
-const PDF_URL = 'https://ifecyber.com/2027-cyber-cert-roadmap.pdf'
+const EMAIL_FROM = 'Ifeanyi @ Ijeanyi <onboarding@ijeanyi.com>'
+const PDF_URL = 'https://ijeanyi.com/2027-cyber-cert-roadmap.pdf'
 
-// Day 0 welcome email — delivers the PDF link
-async function sendWelcomeEmail(email) {
-  await resend.emails.send({
+function emailFooter() {
+  return `
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5;">
+      <p style="font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 8px;">
+        You signed up at ijeanyi.com for the free 2027 Cyber Cert Roadmap and a short
+        3-part email sequence. We do not sell or share your email address.
+      </p>
+      <p style="font-size: 13px; color: #666;">
+        Don't want these emails? <a href="{{unsubscribe_url}}" style="color: #0066ff; text-decoration: underline;">Unsubscribe here</a>.
+      </p>
+    </div>
+  `
+}
+
+function sendEmail({ to, subject, html, sendAt }) {
+  const payload = {
     from: EMAIL_FROM,
+    to,
+    subject,
+    html: html + emailFooter(),
+    headers: {
+      'List-Unsubscribe': '<{{unsubscribe_url}}>',
+    },
+  }
+
+  if (sendAt) {
+    payload.scheduledAt = sendAt
+  }
+
+  return resend.emails.send(payload)
+}
+
+// Day 0 welcome email — delivers the PDF link immediately
+function sendWelcomeEmail(email) {
+  return sendEmail({
     to: email,
-    subject: 'Your roadmap is here. Let\'s go.',
+    subject: "Your 2027 Cyber Cert Roadmap is here.",
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; color: #111;">
         <p style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">You got it.</p>
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-          Here's the 2027 Cyber Cert Roadmap — every cert ranked by job outcome, 
+          Here's the 2027 Cyber Cert Roadmap: every cert ranked by job outcome,
           Security+ first, no fluff. Bookmark it. Use it.
         </p>
         <a href="${PDF_URL}" style="display: inline-block; background: #00d4ff; color: #000; font-weight: 700; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-size: 16px; margin-bottom: 32px;">
           Download the Roadmap
         </a>
         <p style="font-size: 14px; color: #666; line-height: 1.5;">
-          More coming. Cert guides, career deep dives, tool breakdowns — 
-          the stuff I actually use on the job, not the stuff people sell courses about.
+          More coming: cert guides, career deep dives, and tool breakdowns from the
+          stuff I actually use on the job.
         </p>
       </div>
     `,
   })
 }
 
-// Day 2 origin-story email — humanizes him
-async function sendDay2Email(email) {
-  await resend.emails.send({
-    from: EMAIL_FROM,
+// Day 2 origin-story email
+function sendDay2Email(email, sendAt) {
+  return sendEmail({
     to: email,
-    subject: 'How I actually got into cyber (no guru stuff)',
+    subject: 'How I actually got into cybersecurity (no guru stuff)',
+    sendAt,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; color: #111;">
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          People ask me how I got into cybersecurity like it's some magic story. 
-          It's not. I got Security+ because I needed a job. I got the next cert 
-          because the first one opened a door. I kept going because the money was real 
-          and the work was interesting.
+          People ask how I got into cybersecurity like it's some magic story. It isn't.
+          I got Security+ because I needed a job. I got the next cert because the
+          first one opened a door. I kept going because the work was interesting and
+          the money was real.
         </p>
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          No bootcamp. No rich parents. No "just try HTB and you'll figure it out" advice. 
-          Just certs, applied experience, and a roadmap I wish someone had handed me.
+          No bootcamp. No handouts. No "just do CTFs and figure it out" advice. Just
+          certs, applied experience, and a roadmap I wish someone had handed me.
         </p>
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          That's what this is. The roadmap I built for myself, refined against real job listings, 
-          updated for 2027. Everything on there got me or someone I know a job.
+          That's what this is: the roadmap I built for myself, refined against real job
+          listings, updated for 2027.
         </p>
         <p style="font-size: 16px; line-height: 1.6;">
           More coming. Stay tuned.
@@ -61,25 +92,25 @@ async function sendDay2Email(email) {
 }
 
 // Day 4 soft-pitch email — tees up future products without being salesy
-async function sendDay4Email(email) {
-  await resend.emails.send({
-    from: EMAIL_FROM,
+function sendDay4Email(email, sendAt) {
+  return sendEmail({
     to: email,
-    subject: 'What I\'m building next (and why)',
+    subject: "What I'm building next (and why)",
+    sendAt,
     html: `
       <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; color: #111;">
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          The roadmap is the start. I've been putting together study guides, 
-          practice question banks, and career roadmaps for the certs that actually pay — 
-          the ones beyond Security+.
+          The roadmap is the start. I've been putting together study guides, practice
+          question banks, and career roadmaps for the certs that actually pay — the ones
+          beyond Security+.
         </p>
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          They're not free — I'm not selling courses. Think $5–25 study packs, 
-          actual use-it-anywhere PDFs, nothing that requires a subscription.
+          They're not expensive courses. Think $5–25 study packs, actual use-it-anywhere
+          PDFs, nothing that requires a subscription.
         </p>
         <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-          If that sounds useful, you'll be the first to know when they drop. 
-          No hype. Just the stuff that helps.
+          If that sounds useful, you'll be the first to know when they drop. No hype.
+          Just the stuff that helps.
         </p>
         <p style="font-size: 14px; color: #888;">
           Not interested? No hard feelings — you'll still get the free stuff.
@@ -89,44 +120,63 @@ async function sendDay4Email(email) {
   })
 }
 
+function isDuplicateContactError(error) {
+  if (!error) return false
+  if (error.statusCode === 409) return true
+  if (error.status === 409) return true
+  const message = String(error.message || '').toLowerCase()
+  return message.includes('already exists') || message.includes('duplicate') || message.includes('conflict')
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   const { email } = req.body
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
 
-  if (!email || !email.includes('@')) {
+  if (!normalizedEmail || !normalizedEmail.includes('@')) {
     return res.status(400).json({ error: 'Valid email required' })
   }
 
-  try {
-    // Add to Resend audience / contact list
-    // Using a list ID if RESEND_AUDIENCE_ID is set, otherwise just send
-    const audienceId = process.env.RESEND_AUDIENCE_ID
+  const audienceId = process.env.RESEND_AUDIENCE_ID
+  if (!audienceId) {
+    return res.status(500).json({ error: 'Audience ID is not configured.' })
+  }
 
-    if (audienceId) {
+  try {
+    // Add to Resend audience. If the contact already exists, treat it as a duplicate
+    // signup and skip the entire email sequence so we never double-send.
+    let isNewContact = false
+    try {
       await resend.contacts.create({
         audienceId,
-        email,
+        email: normalizedEmail,
         unsubscribed: false,
       })
+      isNewContact = true
+    } catch (contactError) {
+      if (isDuplicateContactError(contactError)) {
+        return res.status(200).json({ success: true, duplicate: true })
+      }
+      throw contactError
+    }
+
+    if (!isNewContact) {
+      return res.status(200).json({ success: true, duplicate: true })
     }
 
     // Send welcome email immediately
-    await sendWelcomeEmail(email)
+    await sendWelcomeEmail(normalizedEmail)
 
-    // Schedule day 2 and day 4 emails via Resend's delays
-    // Resend doesn't have built-in scheduling, so we defer via timestamp
-    const now = Date.now()
-    const day2 = new Date(now + 2 * 24 * 60 * 60 * 1000)
-    const day4 = new Date(now + 4 * 24 * 60 * 60 * 1000)
+    // Schedule day 2 and day 4 emails via Resend's scheduledAt field
+    const now = new Date()
+    const day2 = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString()
+    const day4 = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString()
 
-    // For now: send day 2 and day 4 emails with a note that real scheduling
-    // requires Resend's API or a cron job. We'll send them in sequence for demo.
-    // In production: use RESEND_SCHEDULE or a queue.
-    await sendDay2Email(email)
-    await sendDay4Email(email)
+    await sendDay2Email(normalizedEmail, day2)
+    await sendDay4Email(normalizedEmail, day4)
 
     return res.status(200).json({ success: true })
   } catch (error) {

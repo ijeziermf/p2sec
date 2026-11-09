@@ -1,4 +1,4 @@
-# ifecyber — Cybersecurity Content Business
+# Ijeanyi — Cybersecurity Content Business
 
 Free cert roadmaps, study guides, and career resources from a practicing cybersecurity professional.
 

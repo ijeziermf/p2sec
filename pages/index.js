@@ -4,6 +4,7 @@ export default function Home() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle | loading | success | error
   const [message, setMessage] = useState('')
+  const [imageError, setImageError] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -16,7 +17,7 @@ export default function Home() {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       })
       const data = await res.json()
 
@@ -39,35 +40,43 @@ export default function Home() {
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerInner}>
-          <span style={styles.logo}>ifecyber</span>
+          <span style={styles.logo}>Ijeanyi</span>
         </div>
       </header>
 
       {/* Hero */}
       <section style={styles.hero}>
         <div style={styles.heroContent}>
-          {/* Profile photo placeholder — Ifeanyi replaces this */}
+          {/* Profile photo slot — drop public/headshot.jpg to replace the fallback */}
           <div style={styles.photoWrap}>
-            <div style={styles.photoPlaceholder}>
-              <span style={styles.photoText}>ifeanyi</span>
-            </div>
+            {imageError ? (
+              <div style={styles.photoPlaceholder} aria-label="Photo placeholder">
+                <span style={styles.photoText}>Ijeanyi</span>
+              </div>
+            ) : (
+              <img
+                src="/headshot.jpg"
+                alt="Ifeanyi Ijezie"
+                style={styles.photoImg}
+                onError={() => setImageError(true)}
+              />
+            )}
           </div>
 
           <h1 style={styles.headline}>
-            The 2027 Cyber Cert Roadmap is free.
-            <br />Until I charge for it.
+            Get the free 2027 Cyber Cert Roadmap
+            <br />from a working cybersecurity professional.
           </h1>
 
           <p style={styles.subhead}>
-            I mapped every certification that actually gets you hired —
-            ranked by job outcome, not by how hard the test is.
-            Security+ first. Then the ladder.
-            Straight from someone working in the field.
+            I mapped every certification that actually gets people hired, ranked by job
+            outcome, not by how hard the test is. Start with Security+. Then climb the
+            ladder. Straight from someone working in the field.
           </p>
 
           {/* Lead magnet form */}
           <div style={styles.formBox}>
-            <p style={styles.formLabel}>Drop your email. Get it now.</p>
+            <p style={styles.formLabel}>Drop your email. Get the roadmap.</p>
             <form onSubmit={handleSubmit} style={styles.form}>
               <input
                 type="email"
@@ -98,8 +107,9 @@ export default function Home() {
                 {message}
               </p>
             )}
-            <p style={styles.privacy}>
-              No spam. No selling your data. Unsubscribe anytime.
+            <p style={styles.consent}>
+              By signing up, you agree to receive the free roadmap plus a short 3-part
+              email sequence. Unsubscribe anytime. We never sell or share your email.
             </p>
           </div>
         </div>
@@ -108,15 +118,15 @@ export default function Home() {
       {/* Social proof strip */}
       <section style={styles.proofStrip}>
         <p style={styles.proofText}>
-          Built by a practicing cybersecurity professional &mdash; not a guru, not a course seller.
-          Real experience. Real certs. Real path.
+          Built by a practicing cybersecurity professional. Real experience. Real certs.
+          Real path.
         </p>
       </section>
 
       {/* Footer */}
       <footer style={styles.footer}>
         <p style={styles.footerText}>
-          &copy; {new Date().getFullYear()} ifecyber &mdash; All rights reserved
+          &copy; {new Date().getFullYear()} Ijeanyi. All rights reserved.
         </p>
       </footer>
     </main>
@@ -161,6 +171,15 @@ const styles = {
   },
   photoWrap: {
     marginBottom: '32px',
+  },
+  photoImg: {
+    width: '96px',
+    height: '96px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    display: 'block',
+    margin: '0 auto',
+    border: '2px solid #1a1a2e',
   },
   photoPlaceholder: {
     width: '96px',
@@ -247,10 +266,11 @@ const styles = {
     fontSize: '14px',
     textAlign: 'center',
   },
-  privacy: {
+  consent: {
     marginTop: '14px',
     fontSize: '12px',
     color: '#555577',
+    lineHeight: '1.5',
   },
   proofStrip: {
     padding: '24px',
