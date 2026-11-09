@@ -1,4 +1,4 @@
-# Ijeanyi — Cybersecurity Content Business
+# P2Sec — Cybersecurity Content Business
 
 Free cert roadmaps, study guides, and career resources from a practicing cybersecurity professional.
 

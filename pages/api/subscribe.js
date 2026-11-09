@@ -2,14 +2,14 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const EMAIL_FROM = 'Ifeanyi @ Ijeanyi <onboarding@ijeanyi.com>'
-const PDF_URL = 'https://ijeanyi.com/2027-cyber-cert-roadmap.pdf'
+const EMAIL_FROM = 'Ifeanyi @ P2Sec <onboarding@p2sec.com>'
+const PDF_URL = 'https://p2sec.com/2027-cyber-cert-roadmap.pdf'
 
 function emailFooter() {
   return `
     <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5;">
       <p style="font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 8px;">
-        You signed up at ijeanyi.com for the free 2027 Cyber Cert Roadmap and a short
+        You signed up at p2sec.com for the free 2027 Cyber Cert Roadmap and a short
         3-part email sequence. We do not sell or share your email address.
       </p>
       <p style="font-size: 13px; color: #666;">

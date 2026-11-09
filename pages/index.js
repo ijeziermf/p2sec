@@ -40,7 +40,7 @@ export default function Home() {
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerInner}>
-          <span style={styles.logo}>Ijeanyi</span>
+          <span style={styles.logo}>P2Sec</span>
         </div>
       </header>
 
@@ -51,7 +51,7 @@ export default function Home() {
           <div style={styles.photoWrap}>
             {imageError ? (
               <div style={styles.photoPlaceholder} aria-label="Photo placeholder">
-                <span style={styles.photoText}>Ijeanyi</span>
+                <span style={styles.photoText}>P2Sec</span>
               </div>
             ) : (
               <img
@@ -126,7 +126,7 @@ export default function Home() {
       {/* Footer */}
       <footer style={styles.footer}>
         <p style={styles.footerText}>
-          &copy; {new Date().getFullYear()} Ijeanyi. All rights reserved.
+          &copy; {new Date().getFullYear()} P2Sec. All rights reserved.
         </p>
       </footer>
     </main>
