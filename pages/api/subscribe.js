@@ -3,7 +3,10 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const EMAIL_FROM = 'Ifeanyi @ P2Sec <onboarding@p2sec.com>'
-const PDF_URL = 'https://p2sec.com/2027-cyber-cert-roadmap.pdf'
+// Served from the jsDelivr CDN of this repo's master branch so the download
+// works before the p2sec.com custom domain is live. Swap back to
+// https://p2sec.com/2027-cyber-cert-roadmap.pdf once DNS + Vercel are wired up.
+const PDF_URL = 'https://cdn.jsdelivr.net/gh/ijeziermf/p2sec@master/public/2027-cyber-cert-roadmap.pdf'
 
 function emailFooter() {
   return `
