@@ -5,7 +5,8 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_FROM = 'Ifeanyi @ P2Sec <onboarding@p2sec.com>'
 const PDF_URL = 'https://p2sec.com/2027-cyber-cert-roadmap.pdf'
 
-function emailFooter() {
+function emailFooter(email) {
+  const unsubscribeUrl = `https://p2sec.com/api/unsubscribe?email=${encodeURIComponent(email)}`
   return `
     <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5;">
       <p style="font-size: 13px; color: #666; line-height: 1.5; margin-bottom: 8px;">
@@ -13,20 +14,22 @@ function emailFooter() {
         3-part email sequence. We do not sell or share your email address.
       </p>
       <p style="font-size: 13px; color: #666;">
-        Don't want these emails? <a href="{{unsubscribe_url}}" style="color: #0066ff; text-decoration: underline;">Unsubscribe here</a>.
+        Don't want these emails? <a href="${unsubscribeUrl}" style="color: #0066ff; text-decoration: underline;">Unsubscribe here</a>.
       </p>
     </div>
   `
 }
 
 function sendEmail({ to, subject, html, sendAt }) {
+  const unsubscribeUrl = `https://p2sec.com/api/unsubscribe?email=${encodeURIComponent(to)}`
   const payload = {
     from: EMAIL_FROM,
     to,
     subject,
-    html: html + emailFooter(),
+    html: html + emailFooter(to),
     headers: {
-      'List-Unsubscribe': '<{{unsubscribe_url}}>',
+      'List-Unsubscribe': `<${unsubscribeUrl}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
   }
 
