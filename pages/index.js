@@ -1,14 +1,21 @@
 import { useState } from 'react'
+import Head from 'next/head'
 
 export default function Home() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle | loading | success | error
   const [message, setMessage] = useState('')
-  const [imageError, setImageError] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email) return
+    const value = email.trim()
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+
+    if (!valid) {
+      setStatus('error')
+      setMessage("That email doesn't look right — check it and try again.")
+      return
+    }
 
     setStatus('loading')
     setMessage('')
@@ -16,14 +23,14 @@ export default function Home() {
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
+        body: JSON.stringify({ email: value }),
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
       })
       const data = await res.json()
 
-      if (res.ok) {
+      if (res.ok && data.success) {
         setStatus('success')
-        setMessage("You're in. Check your inbox — the roadmap drops in the next few minutes.")
+        setMessage("You're on the list — the Roadmap is headed to " + value + ".")
         setEmail('')
       } else {
         setStatus('error')
@@ -35,263 +42,204 @@ export default function Home() {
     }
   }
 
+  const title = 'Be Impactful From Day One in Cybersecurity | P2Sec'
+  const description = 'The free 2027 Cyber Cert Roadmap from P2Sec. Certs mapped by job outcome, not difficulty. Start with Security+ and climb the ladder.'
+  const url = 'https://p2sec.com/'
+  const image = 'https://p2sec.com/headshot.jpg'
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: 'P2Sec',
+        url: url,
+      },
+      {
+        '@type': 'Person',
+        name: 'Ifeanyi Ijezie',
+        jobTitle: 'Founder of P2Sec',
+        worksFor: { '@type': 'Organization', name: 'P2Sec' },
+      },
+    ],
+  }
+
+  const msgClass =
+    status === 'success' ? 'form-msg ok' : status === 'error' ? 'form-msg err' : 'form-msg'
+
   return (
-    <main style={styles.main}>
-      {/* Header */}
-      <header style={styles.header}>
-        <div style={styles.headerInner}>
-          <span style={styles.logo}>P2Sec</span>
+    <>
+      <Head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="color-scheme" content="light" />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={url} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,640&family=Public+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={url} />
+        <meta property="og:image" content={image} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={image} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </Head>
+
+      <header className="topbar">
+        <div className="wrap topbar-inner">
+          <a className="wordmark" href="#">P2Sec</a>
+          <span className="topbar-note">The 2027 Cyber Cert Roadmap — free</span>
         </div>
       </header>
 
-      {/* Hero */}
-      <section style={styles.hero}>
-        <div style={styles.heroContent}>
-          {/* Profile photo slot — drop public/headshot.jpg to replace the fallback */}
-          <div style={styles.photoWrap}>
-            {imageError ? (
-              <div style={styles.photoPlaceholder} aria-label="Photo placeholder">
-                <span style={styles.photoText}>P2Sec</span>
+      <main>
+        <section className="hero">
+          <div className="wrap hero-grid">
+            <div>
+              <h1>Be <span className="hl">impactful</span> from day one in cybersecurity — even if you&apos;re starting from nothing.</h1>
+              <p className="subhead">
+                The free <strong>2027 Cyber Cert Roadmap</strong> from P2Sec. Certs mapped by job outcome, not difficulty.
+                Start with <strong>Security+</strong>. Then climb the ladder — so you walk in ready to contribute, not just ready to interview.
+              </p>
+              <ul className="hero-points">
+                <li><span className="dot"></span>Certs in job order</li>
+                <li><span className="dot"></span>Built for beginners</li>
+                <li><span className="dot"></span>Day-one impact, not just interviews</li>
+              </ul>
+            </div>
+
+            <div className="signup" id="get-roadmap">
+              <h2>Get the free Roadmap</h2>
+              <p className="lead">Drop your email and the 2027 Cyber Cert Roadmap is on its way.</p>
+              <form id="roadmap-form" noValidate onSubmit={handleSubmit}>
+                <label htmlFor="email">Email address</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  inputMode="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={status === 'loading' || status === 'success'}
+                />
+                <button type="submit" disabled={status === 'loading' || status === 'success'}>
+                  {status === 'loading' ? 'Sending…' : 'Get the free Roadmap'}
+                </button>
+                <p id="form-msg" className={msgClass} role="status" aria-live="polite">
+                  {message}
+                </p>
+              </form>
+              <p className="fineprint">Free. Plus a short 3-part email sequence to get you started.</p>
+              <p className="consent">
+                By signing up, you agree to the free roadmap plus a short 3-part email sequence. Unsubscribe anytime. We never sell or share your email.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="block">
+          <div className="wrap">
+            <div className="section-head">
+              <h2>Who this is for</h2>
+              <p>You don&apos;t need a head start. You need a path that&apos;s in the right order.</p>
+            </div>
+            <div className="fit-grid">
+              <div className="fit-card">
+                <span className="num">01</span>
+                <p>Starting from little to nothing, or nothing at all</p>
               </div>
-            ) : (
+              <div className="fit-card">
+                <span className="num">02</span>
+                <p>Studied some cyber in college, or know the basics like hacking and DDoS, but not job-ready yet</p>
+              </div>
+              <div className="fit-card">
+                <span className="num">03</span>
+                <p>Curious or already interested, just don&apos;t know how to break in</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="block steps-band">
+          <div className="wrap">
+            <div className="section-head">
+              <h2>How it works</h2>
+              <p>Three steps. No guessing about what to study next.</p>
+            </div>
+            <div className="steps">
+              <div className="step">
+                <span className="step-num">1</span>
+                <h3>Get the Roadmap</h3>
+                <p>The free 2027 Cyber Cert Roadmap, sent straight to your inbox.</p>
+              </div>
+              <div className="step">
+                <span className="step-num">2</span>
+                <h3>Study it — certs in job order</h3>
+                <p>Work through the certs in the order employers actually hire for, starting with Security+.</p>
+              </div>
+              <div className="step">
+                <span className="step-num">3</span>
+                <h3>Show up Day-One Impact ready</h3>
+                <p>Walk in ready to contribute from your first day — not just ready to interview.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="block">
+          <div className="wrap about-grid">
+            <figure className="about-photo" style={{ margin: 0 }}>
               <img
                 src="/headshot.jpg"
-                alt="Ifeanyi Ijezie"
-                style={styles.photoImg}
-                onError={() => setImageError(true)}
+                alt="Ifeanyi Ijezie, founder of P2Sec"
               />
-            )}
-          </div>
-
-          <h1 style={styles.headline}>
-            Get the free 2027 Cyber Cert Roadmap
-            <br />from a working cybersecurity professional.
-          </h1>
-
-          <p style={styles.subhead}>
-            I mapped every certification that actually gets people hired, ranked by job
-            outcome, not by how hard the test is. Start with Security+. Then climb the
-            ladder. Straight from someone working in the field.
-          </p>
-
-          {/* Lead magnet form */}
-          <div style={styles.formBox}>
-            <p style={styles.formLabel}>Drop your email. Get the roadmap.</p>
-            <form onSubmit={handleSubmit} style={styles.form}>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={styles.input}
-                disabled={status === 'loading' || status === 'success'}
-              />
-              <button
-                type="submit"
-                style={{
-                  ...styles.button,
-                  ...(status === 'success' ? styles.buttonSuccess : {}),
-                  ...(status === 'loading' ? styles.buttonDisabled : {}),
-                }}
-                disabled={status === 'loading' || status === 'success'}
-              >
-                {status === 'loading' ? 'Sending…' : status === 'success' ? 'Sent ✓' : 'Get the Roadmap'}
-              </button>
-            </form>
-            {message && (
-              <p style={{
-                ...styles.formMessage,
-                color: status === 'error' ? '#ff6b6b' : '#4ade80',
-              }}>
-                {message}
+            </figure>
+            <div className="about-copy">
+              <h2>A few steps ahead, not ten years</h2>
+              <p className="about-text">
+                I&apos;m Ifeanyi Ijezie, founder of P2Sec — a working cybersecurity professional growing toward CISO.
+                I&apos;m a few steps ahead of you, not ten years ahead. We grow together: discipline in the gym,
+                skills to get hired, and work that actually matters on day one.
               </p>
-            )}
-            <p style={styles.consent}>
-              By signing up, you agree to receive the free roadmap plus a short 3-part
-              email sequence. Unsubscribe anytime. We never sell or share your email.
-            </p>
+              <ul className="grow-list">
+                <li><span className="tick">✓</span>Discipline in the gym</li>
+                <li><span className="tick">✓</span>Skills to get hired</li>
+                <li><span className="tick">✓</span>Work that matters on day one</li>
+              </ul>
+            </div>
           </div>
+        </section>
+
+        <section className="closing">
+          <div className="wrap">
+            <h2>Start where you are. Be ready on day one.</h2>
+            <p>The Roadmap is free, and it starts with Security+. Everything after that is already mapped out for you.</p>
+            <a className="cta-link" href="#get-roadmap">Get the free Roadmap</a>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <div className="wrap footer-inner">
+          <span className="f-brand">P2Sec</span>
+          <p>Built by Ifeanyi Ijezie, founder of P2Sec. Real experience. Real path. Impact from day one.</p>
         </div>
-      </section>
-
-      {/* Social proof strip */}
-      <section style={styles.proofStrip}>
-        <p style={styles.proofText}>
-          Built by a practicing cybersecurity professional. Real experience. Real certs.
-          Real path.
-        </p>
-      </section>
-
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <p style={styles.footerText}>
-          &copy; {new Date().getFullYear()} P2Sec. All rights reserved.
-        </p>
       </footer>
-    </main>
+    </>
   )
-}
-
-const styles = {
-  main: {
-    minHeight: '100vh',
-    backgroundColor: '#0a0a0f',
-    color: '#f0f0f0',
-    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  header: {
-    borderBottom: '1px solid #1a1a2e',
-    padding: '20px 0',
-  },
-  headerInner: {
-    maxWidth: '680px',
-    margin: '0 auto',
-    padding: '0 24px',
-  },
-  logo: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: '#00d4ff',
-    letterSpacing: '-0.5px',
-  },
-  hero: {
-    flex: '1',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '80px 24px',
-  },
-  heroContent: {
-    maxWidth: '600px',
-    width: '100%',
-    textAlign: 'center',
-  },
-  photoWrap: {
-    marginBottom: '32px',
-  },
-  photoImg: {
-    width: '96px',
-    height: '96px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    display: 'block',
-    margin: '0 auto',
-    border: '2px solid #1a1a2e',
-  },
-  photoPlaceholder: {
-    width: '96px',
-    height: '96px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '0 auto',
-    fontSize: '32px',
-    fontWeight: '700',
-    color: '#fff',
-  },
-  photoText: {
-    fontSize: '28px',
-  },
-  headline: {
-    fontSize: 'clamp(26px, 5vw, 40px)',
-    fontWeight: '800',
-    lineHeight: '1.15',
-    marginBottom: '20px',
-    color: '#ffffff',
-    letterSpacing: '-1px',
-  },
-  subhead: {
-    fontSize: '17px',
-    lineHeight: '1.65',
-    color: '#9999aa',
-    marginBottom: '40px',
-  },
-  formBox: {
-    background: '#111122',
-    border: '1px solid #1e1e3a',
-    borderRadius: '16px',
-    padding: '32px',
-  },
-  formLabel: {
-    fontSize: '15px',
-    fontWeight: '600',
-    color: '#00d4ff',
-    marginBottom: '16px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-  },
-  form: {
-    display: 'flex',
-    gap: '10px',
-    flexWrap: 'wrap',
-  },
-  input: {
-    flex: '1 1 220px',
-    padding: '14px 18px',
-    fontSize: '16px',
-    background: '#0a0a1a',
-    border: '1px solid #2a2a4a',
-    borderRadius: '10px',
-    color: '#fff',
-    outline: 'none',
-    minWidth: '0',
-  },
-  button: {
-    padding: '14px 24px',
-    fontSize: '16px',
-    fontWeight: '700',
-    background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)',
-    border: 'none',
-    borderRadius: '10px',
-    color: '#fff',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-    transition: 'opacity 0.2s',
-  },
-  buttonDisabled: {
-    opacity: '0.6',
-    cursor: 'not-allowed',
-  },
-  buttonSuccess: {
-    background: 'linear-gradient(135deg, #00c896 0%, #00a060 100%)',
-    cursor: 'default',
-  },
-  formMessage: {
-    marginTop: '12px',
-    fontSize: '14px',
-    textAlign: 'center',
-  },
-  consent: {
-    marginTop: '14px',
-    fontSize: '12px',
-    color: '#555577',
-    lineHeight: '1.5',
-  },
-  proofStrip: {
-    padding: '24px',
-    background: '#0d0d1a',
-    borderTop: '1px solid #1a1a2e',
-    textAlign: 'center',
-  },
-  proofText: {
-    fontSize: '13px',
-    color: '#666688',
-    maxWidth: '520px',
-    margin: '0 auto',
-    lineHeight: '1.5',
-  },
-  footer: {
-    padding: '20px 24px',
-    textAlign: 'center',
-    borderTop: '1px solid #1a1a2e',
-  },
-  footerText: {
-    fontSize: '12px',
-    color: '#444455',
-  },
 }
